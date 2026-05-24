@@ -141,10 +141,10 @@ canvas{
       <textarea id="cv">Profissional de cibersegurança com experiência em SOC, SIEM, XDR, arquitetura, resposta a incidentes, gestão de vulnerabilidades e pré-vendas técnicas. Traduz tecnologia para negócio sem matar o técnico por dentro.</textarea>
 
       <button onclick="downloadPNG()">Baixar PNG</button>
-      <button id="gifBtn">Baixar GIF Animado</button>
+      <button id="gifBtn">Baixar GIF Animado HD</button>
 
       <div id="progress" class="progress"></div>
-      <small>O GIF troca frente e verso mais devagar.</small>
+      <small>GIF em 760x430, 256 cores e troca frente/verso mais lenta.</small>
     </section>
 
     <section class="panel canvasWrap">
@@ -422,6 +422,8 @@ function drawFrameTo(c,side,frame){
   else drawFront(c,frame);
 }
 
+window.drawFrameTo = drawFrameTo;
+
 function drawPreview(){
   drawFrameTo(ctx,$("side").value,Math.floor(Date.now()/60));
 }
@@ -453,11 +455,11 @@ const progress = document.getElementById("progress");
 
 btn.addEventListener("click", async () => {
   btn.disabled = true;
-  progress.textContent = "Gerando GIF...";
+  progress.textContent = "Gerando GIF HD...";
 
-  const w = 520;
-  const h = 294;
-  const totalFrames = 20;
+  const w = 760;
+  const h = 430;
+  const totalFrames = 16;
 
   const full = document.createElement("canvas");
   full.width = 1520;
@@ -473,27 +475,27 @@ btn.addEventListener("click", async () => {
 
   for(let i=0;i<totalFrames;i++){
     const side = i < totalFrames / 2 ? "front" : "back";
-    fctx.clearRect(0,0,1520,860);
 
+    fctx.clearRect(0,0,1520,860);
     window.drawFrameTo(fctx,side,i*5);
 
     sctx.clearRect(0,0,w,h);
     sctx.drawImage(full,0,0,w,h);
 
     const image = sctx.getImageData(0,0,w,h);
-    const palette = quantize(image.data,128);
+    const palette = quantize(image.data,256);
     const index = applyPalette(image.data,palette);
 
     gif.writeFrame(index,w,h,{
       palette,
-      delay:900
+      delay:1000
     });
 
     progress.textContent = "Frames: " + Math.round(((i+1)/totalFrames)*100) + "%";
     await new Promise(r=>setTimeout(r,10));
   }
 
-  progress.textContent = "Finalizando GIF...";
+  progress.textContent = "Finalizando GIF HD...";
   gif.finish();
 
   const blob = new Blob([gif.bytesView()],{type:"image/gif"});
@@ -501,13 +503,13 @@ btn.addEventListener("click", async () => {
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = "cybercard-animado.gif";
+  a.download = "cybercard-hd.gif";
   document.body.appendChild(a);
   a.click();
   a.remove();
 
   URL.revokeObjectURL(url);
-  progress.textContent = "GIF gerado com sucesso, bebê.";
+  progress.textContent = "GIF HD gerado com sucesso, bebê.";
   btn.disabled = false;
 });
 </script>
